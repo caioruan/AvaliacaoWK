@@ -68,14 +68,14 @@ type
     procedure edtProdutoExit(Sender: TObject);
     procedure FormKeyPress(Sender: TObject; var Key: Char);
     procedure edtPrecoVendaExit(Sender: TObject);
-    procedure DBGrid1KeyPress(Sender: TObject; var Key: Char);
     procedure actAtualizarExecute(Sender: TObject);
-    procedure mmVendaItemAfterPost(DataSet: TDataSet);
     procedure edtClienteChange(Sender: TObject);
     procedure SpeedButton1Click(Sender: TObject);
     procedure actAdicionarExecute(Sender: TObject);
     procedure btnConsultarClick(Sender: TObject);
     procedure btnCancelarClick(Sender: TObject);
+    procedure DBGrid1KeyDown(Sender: TObject; var Key: Word;
+      Shift: TShiftState);
   private
     fCliente: TClienteController;
     fConnection: IConnection;
@@ -102,17 +102,34 @@ implementation
 
 {$R *.dfm}
 
-procedure TViewPrincipal.DBGrid1KeyPress(Sender: TObject; var Key: Char);
+procedure TViewPrincipal.DBGrid1KeyDown(Sender: TObject; var Key: Word;
+  Shift: TShiftState);
 begin
-  if Key = #13 then
-  begin
-    actAtualizar.Tag := mmVendaItem.RecNo;
-    edtProduto.Text := mmVendaItemPRODUTO.AsString;
-    edtQuantidade.Text := mmVendaItemQUANTIDADE.Text;
-    edtPrecoVenda.Text := mmVendaItemVALOR.Text;
-    edtDescricaoProduto.Text := mmVendaItemDESCRICAO.Text;
-    btnAdicionar.Action := actAtualizar;
-  end;
+  Case Key Of
+    13:
+    Begin
+      edtProduto.Enabled := false;
+      edtDescricaoProduto.Enabled := false;
+      actAtualizar.Tag := mmVendaItem.RecNo;
+      edtProduto.Text := mmVendaItemPRODUTO.AsString;
+      edtQuantidade.Text := mmVendaItemQUANTIDADE.Text;
+      edtPrecoVenda.Text := mmVendaItemVALOR.Text;
+      edtDescricaoProduto.Text := mmVendaItemDESCRICAO.Text;
+      btnAdicionar.Action := actAtualizar;
+    End;
+    46:
+    begin
+      if application.messagebox(PWideChar( 'Confirma a exclusão do item ' + mmVendaItemDESCRICAO.AsString + '?'),
+        'Excluir Item',mb_yesno+mb_defbutton2)=idyes
+      then
+      Begin
+        mmVendaItem.Delete;
+        ClearProduto;
+        edtProduto.SetFocus;
+        btnAdicionar.Action := actAdicionar;
+      End;
+    end;
+  End;
 end;
 
 procedure TViewPrincipal.edtClienteChange(Sender: TObject);
@@ -177,11 +194,6 @@ begin
   Close;
 end;
 
-procedure TViewPrincipal.mmVendaItemAfterPost(DataSet: TDataSet);
-begin
-  edtProduto.SetFocus;
-end;
-
 procedure TViewPrincipal.SpeedButton1Click(Sender: TObject);
 Var
   Venda: TVendaController;
@@ -217,7 +229,7 @@ begin
   InserirProduto(edtProduto.Text, edtDescricaoProduto.Text,
     StrToCurr(edtQuantidade.Text), StrToCurr(edtPrecoVenda.Text));
   ClearProduto;
-
+  edtProduto.SetFocus;
 end;
 
 procedure TViewPrincipal.actAtualizarExecute(Sender: TObject);
@@ -231,6 +243,8 @@ begin
   mmVendaItemTOTAL.AsCurrency := mmVendaItemQUANTIDADE.AsCurrency *
     mmVendaItemVALOR.AsCurrency;
   mmVendaItem.Post;
+  ClearProduto;
+  edtProduto.SetFocus;
   btnAdicionar.Action := actAdicionar;
 end;
 
@@ -282,6 +296,8 @@ end;
 
 procedure TViewPrincipal.ClearProduto;
 begin
+  edtProduto.Enabled := true;
+  edtDescricaoProduto.Enabled := true;
   edtProduto.Clear;
   edtQuantidade.Clear;
   edtPrecoVenda.Clear;

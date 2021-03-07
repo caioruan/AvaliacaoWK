@@ -323,14 +323,14 @@ object ViewPrincipal: TViewPrincipal
       TabStop = False
       Align = alClient
       DataSource = dsVendaItem
-      Options = [dgTitles, dgIndicator, dgColumnResize, dgColLines, dgTabs, dgConfirmDelete, dgCancelOnExit, dgTitleClick, dgTitleHotTrack]
+      Options = [dgTitles, dgIndicator, dgColumnResize, dgColLines, dgTabs, dgRowSelect, dgConfirmDelete, dgCancelOnExit, dgTitleClick, dgTitleHotTrack]
       TabOrder = 2
       TitleFont.Charset = DEFAULT_CHARSET
       TitleFont.Color = clWindowText
       TitleFont.Height = -19
       TitleFont.Name = 'Segoe UI'
       TitleFont.Style = []
-      OnKeyPress = DBGrid1KeyPress
+      OnKeyDown = DBGrid1KeyDown
       Columns = <
         item
           Expanded = False
@@ -426,7 +426,6 @@ object ViewPrincipal: TViewPrincipal
     end
   end
   object mmVendaItem: TFDMemTable
-    AfterPost = mmVendaItemAfterPost
     AggregatesActive = True
     FetchOptions.AssignedValues = [evMode]
     FetchOptions.Mode = fmAll
